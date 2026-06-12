@@ -1,89 +1,45 @@
-import io
-import os
-import uuid
-from azure.identity import DefaultAzureCredential
-from azure.storage.blob import BlobServiceClient, ContainerClient, BlobBlock, BlobClient, StandardBlobTier
 import kagglehub
 from kagglehub import KaggleDatasetAdapter
 import pandas as pd
 import struct
-from sqlalchemy import create_engine
-
+from azure.identity import DefaultAzureCredential
+from sqlalchemy import create_engine, event
 DATASET = "kaisersafdf/messy-e-ccomerce-dataset"
-account_url = "https://<jtaawstorage>.blob.core.windows.net"
-credential = DefaultAzureCredential()
-blob_service_client = BlobServiceClient(account_url=account_url,credential=credential)
-container_name = "mycontainer"
+SERVER = "jtaservidor2.database.windows.net"
+DATABASE = "NewOutletdb_development"
 
-def extract_data() -> dict[str, pd.DataFrame]:
+SQL_COPT_SS_ACCESS_TOKEN = 1256
+TOKEN_URL = "https://database.windows.net/"
+
+def extract_data() -> pd.DataFrame:
     print(f"Downloading dataset: {DATASET}")
     df = kagglehub.dataset_load(
         KaggleDatasetAdapter.PANDAS,
         handle=DATASET,
-        path="messy_ecommerce_operations.csv"   # filename inside the dataset
+        path="messy_ecommerce_operations.csv"
     )
     print(f"  Loaded: {df.shape[0]:,} rows, {df.shape[1]} columns")
-    return {"data": df}
-
-def load_to_blob(tables:dict[str,pd.DataFrame]):
-        """Uploads each DataFrame as a JSON blob to Azure Blob Storage."""
-        account_url = "https://jtaawstorage.blob.core.windows.net"
-        credential = DefaultAzureCredential()
-        blob_service_client = BlobServiceClient(account_url=account_url,credential=credential)
-        container_name = "mycontainer"
-
-        
-        
-        for table_name, df in tables.items():
-             blob_name = f"raw/{table_name}.json"
-             json_string = df.to_json(orient="records", indent=2, force_ascii=False)
-             blob_client  = blob_service_client.get_blob_client(
-                container= container_name ,blob=blob_name)
-        
-             blob_client .upload_blob(json_string, overwrite=True)
-             print(f"  Uploaded: {blob_name}")
-             
-
-def read_blob() -> pd.DataFrame:
-     account_url = "https://jtaawstorage.blob.core.windows.net"
-     credential = DefaultAzureCredential()
-     blob_service_client = BlobServiceClient(account_url=account_url,credential=credential)
-     
-     
-     blob_client  = blob_service_client.get_blob_client(
-                container= "mycontainer" ,blob="raw/data.json")
-     json_string = blob_client.download_blob().readall().decode("utf-8")
-     df = pd.read_json(json_string)
-     print(f"  Read from blob: {df.shape[0]:,} rows, {df.shape[1]} columns")
-     return df
+    return df
 
 def load_to_sql(df: pd.DataFrame):
-    """Loads DataFrame into Azure SQL as a raw table."""
+    print("Connecting to Azure SQL...")
     credential = DefaultAzureCredential()
-    token = credential.get_token("https://database.windows.net/.default")
-    token_bytes = token.token.encode("utf-16-le")
-    token_struct = struct.pack(f"<I{len(token_bytes)}s", len(token_bytes), token_bytes)
-
-
-    server_name = "jtaservidor2.database.windows.net"
-    db_name = "NewOutletdb_development"
     connection_string = (
-        f"mssql+pyodbc://@{server_name}/{db_name}"
+        f"mssql+pyodbc://@{SERVER}/{DATABASE}"
         f"?driver=ODBC+Driver+18+for+SQL+Server"
     )
-    engine = create_engine(
-        connection_string,
-        connect_args={"attrs_before": {1256: token_struct}}
-    )
+    engine = create_engine(connection_string)
+
+    @event.listens_for(engine, "do_connect")
+    def provide_token(dialect, conn_rec, cargs, cparams):
+        cargs[0] = cargs[0].replace(";Trusted_Connection=Yes", "")
+        raw_token = credential.get_token(TOKEN_URL).token.encode("utf-16-le")
+        token_struct = struct.pack(f"<I{len(raw_token)}s", len(raw_token), raw_token)
+        cparams["attrs_before"] = {SQL_COPT_SS_ACCESS_TOKEN: token_struct}
 
     df.to_sql("ecommerce_raw", engine, if_exists="replace", index=False)
-    print("  Loaded into Azure SQL: table 'ecommerce_raw'")
+    print("  Done. Table 'ecommerce_raw' loaded into Azure SQL.")
 
 if __name__ == "__main__":
-    df = read_blob()
-    load_to_blob(df)
-
-print(df.head())
-
-"""tables = extract_data()
-    print(tables["data"].head())"""
+    df = extract_data()
+    load_to_sql(df)
