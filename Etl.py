@@ -51,9 +51,9 @@ def read_blob() -> pd.DataFrame:
      
      
      blob_client  = blob_service_client.get_blob_client(
-                container= "mycontainer" ,blob=f"raw/data.json")
+                container= "mycontainer" ,blob="raw/data.json")
      json_string = blob_client.download_blob().readall().decode("utf-8")
-     df = pd.read_json(json_string,orient="records")
+     df = pd.read_json(json_string)
      print(f"  Read from blob: {df.shape[0]:,} rows, {df.shape[1]} columns")
      return df
 
@@ -81,8 +81,9 @@ def load_to_sql(df: pd.DataFrame):
 
 if __name__ == "__main__":
     df = read_blob()
-    load_to_sql(df)
+    load_to_blob(df)
 
+print(df.head())
 
-    """tables = extract_data()
+"""tables = extract_data()
     print(tables["data"].head())"""
