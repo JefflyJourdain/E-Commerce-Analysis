@@ -6,7 +6,8 @@ from azure.storage.blob import BlobServiceClient, ContainerClient, BlobBlock, Bl
 import kagglehub
 from kagglehub import KaggleDatasetAdapter
 import pandas as pd
-
+import struct
+from sqlalchemy import create_engine
 
 DATASET = "kaisersafdf/messy-e-ccomerce-dataset"
 account_url = "https://<jtaawstorage>.blob.core.windows.net"
@@ -43,13 +44,45 @@ def load_to_blob(tables:dict[str,pd.DataFrame]):
              print(f"  Uploaded: {blob_name}")
              
 
-   
+def read_blob() -> pd.DataFrame:
+     account_url = "https://jtaawstorage.blob.core.windows.net"
+     credential = DefaultAzureCredential()
+     blob_service_client = BlobServiceClient(account_url=account_url,credential=credential)
+     
+     
+     blob_client  = blob_service_client.get_blob_client(
+                container= "mycontainer" ,blob=f"raw/data.json")
+     json_string = blob_client.download_blob().readall().decode("utf-8")
+     df = pd.read_json(json_string,orient="records")
+     print(f"  Read from blob: {df.shape[0]:,} rows, {df.shape[1]} columns")
+     return df
+
+def load_to_sql(df: pd.DataFrame):
+    """Loads DataFrame into Azure SQL as a raw table."""
+    credential = DefaultAzureCredential()
+    token = credential.get_token("https://database.windows.net/.default")
+    token_bytes = token.token.encode("utf-16-le")
+    token_struct = struct.pack(f"<I{len(token_bytes)}s", len(token_bytes), token_bytes)
 
 
+    server_name = "jtaservidor2.database.windows.net"
+    db_name = "NewOutletdb_development"
+    connection_string = (
+        f"mssql+pyodbc://@{server_name}/{db_name}"
+        f"?driver=ODBC+Driver+18+for+SQL+Server"
+    )
+    engine = create_engine(
+        connection_string,
+        connect_args={"attrs_before": {1256: token_struct}}
+    )
+
+    df.to_sql("ecommerce_raw", engine, if_exists="replace", index=False)
+    print("  Loaded into Azure SQL: table 'ecommerce_raw'")
 
 if __name__ == "__main__":
-    tables = extract_data()
-    load_to_blob(tables)
+    df = read_blob()
+    load_to_sql(df)
+
 
     """tables = extract_data()
     print(tables["data"].head())"""
