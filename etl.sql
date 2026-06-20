@@ -22,7 +22,8 @@ WITH normalized_data AS (
 
 
 FactSales AS (
-        SELECT order_id,
+        
+        SELECT DISTINCT product_id,order_id,
             COALESCE(
             TRY_CAST(TRY_CONVERT(DATETIME,order_date,101) AS DATE),
                 TRY_CAST(TRY_CONVERT(DATETIME,order_date,103) AS DATE),
@@ -120,7 +121,7 @@ FactInventory AS (
         from ecommerce_raw),
 
 returns_processed AS (
-    SELECT order_id,
+    SELECT DISTINCT order_id,
         COALESCE(
             TRY_CAST(TRY_CONVERT(DATETIME,return_date,101) AS DATE),
                 TRY_CAST(TRY_CONVERT(DATETIME,return_date,103) AS DATE),
@@ -139,7 +140,7 @@ returns_processed AS (
     from ecommerce_raw
 ),
 FactReturns AS (
-    select  order_id,return_date,return_reason,sum(refund_amount) AS refund_amount 
+    select order_id,return_date,return_reason,sum(refund_amount) AS refund_amount 
 
 
         FROM returns_processed

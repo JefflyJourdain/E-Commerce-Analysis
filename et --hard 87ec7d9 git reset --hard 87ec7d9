@@ -1,0 +1,21 @@
+[33m166670e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: commit: fdafd
+[33meb66710[m HEAD@{1}: reset: moving to eb66710
+[33m547d506[m HEAD@{2}: commit: fdffdf
+[33m87ec7d9[m HEAD@{3}: commit: DFD
+[33mbf825df[m HEAD@{4}: commit: RETURNS
+[33m45d1135[m HEAD@{5}: commit (merge): Merge branch 'main' of https://github.com/JefflyJourdain/E-Commerce-Analysis
+[33mf4a8f1b[m HEAD@{6}: commit (amend): eda
+[33m9735ddb[m HEAD@{7}: commit: dim
+[33meb66710[m HEAD@{8}: commit: dim customer
+[33m7824f6f[m HEAD@{9}: commit: first fact and dim table created
+[33m109a6c4[m HEAD@{10}: commit: standarized columns
+[33m9550aed[m HEAD@{11}: commit: data cleaned dates
+[33me4f3109[m HEAD@{12}: commit: data cleaning
+[33m9123a9e[m HEAD@{13}: commit: sql
+[33maeca1dd[m HEAD@{14}: commit: load
+[33mab90d05[m HEAD@{15}: commit: creation
+[33m3693490[m HEAD@{16}: commit: c
+[33m4ce87ae[m HEAD@{17}: commit: load
+[33m1888138[m HEAD@{18}: commit: env
+[33m05d0f53[m HEAD@{19}: commit: ss
+[33mf57e22f[m HEAD@{20}: clone: from https://github.com/JefflyJourdain/E-Commerce-Analysis.git
