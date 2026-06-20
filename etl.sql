@@ -65,11 +65,14 @@ CREATE VIEW FactSales AS
             gross_margin_pct,
             shipping_cost,
             geography_key,
-            payment_method,
+            CASE 
+                WHEN lower(payment_method) IN('visa','mastercard','cc') THEN 'Credit Card'
+                    ELSE payment_method
+                    END AS payment_method,
             payment_status,
             fulfillment_status,
-            order_status,
-            notes
+            order_status
+            
 
 
         FROM ecommerce_raw
