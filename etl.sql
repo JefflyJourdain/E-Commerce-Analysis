@@ -71,7 +71,8 @@ CREATE VIEW FactSales AS
                     END AS payment_method,
             payment_status,
             fulfillment_status,
-            order_status
+            order_status,
+            notes
             
 
 
