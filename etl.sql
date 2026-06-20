@@ -1,3 +1,7 @@
+DROP VIEW IF EXISTS DimGeography
+GO
+CREATE VIEW DimGeography AS 
+
 WITH normalized_data AS (
     SELECT 
         region,
@@ -7,10 +11,10 @@ WITH normalized_data AS (
         END AS country_normalized
     FROM  ecommerce_raw
     WHERE region IS NOT NULL
-),
+)
 
- DimGeography AS (
-    SELECT TOP 20 
+
+    SELECT 
         ROW_NUMBER() OVER(ORDER BY country_normalized) AS geography_key,
         region,
         country_normalized
@@ -18,10 +22,16 @@ WITH normalized_data AS (
     FROM  normalized_data
     GROUP BY 
         region,
-        country_normalized ),
+        country_normalized;
+GO
 
 
-FactSales AS (
+
+
+DROP VIEW IF EXISTS FactSales
+GO
+CREATE VIEW FactSales AS 
+
         
         SELECT DISTINCT product_id,order_id,
             COALESCE(
@@ -54,31 +64,39 @@ FactSales AS (
             gross_profit,
             gross_margin_pct,
             shipping_cost,
-            
-
-
-
-
-            geography_key
+            geography_key,
+            payment_method,
+            payment_status,
+            fulfillment_status,
+            order_status,
+            notes
 
 
         FROM ecommerce_raw
-        LEFT JOIN DimGeography on ecommerce_raw.region = DimGeography.region
-),
+        LEFT JOIN DimGeography on ecommerce_raw.region = DimGeography.region;
+GO
 
 
-unique_cust AS (
+DROP VIEW IF EXISTS DimCustomer
+GO
+CREATE VIEW DimCustomer AS 
+
+WITH unique_cust AS (
     SELECT customer_id,customer_name,customer_email,customer_segment,
         ROW_NUMBER() over(PARTITION BY customer_id ORDER BY customer_id) as num_cust
-    from ecommerce_raw),
+    from ecommerce_raw)
 
-DimCustomer AS(
+
     SELECT customer_id,customer_name,customer_email,customer_segment
     from unique_cust
-    where num_cust = 1),
+    where num_cust = 1
+GO
 
+DROP VIEW IF EXISTS DimProduct
+GO
+CREATE VIEW DimProduct AS 
 
-unique_products as (
+WITH unique_products as (
     SELECT product_id, product_name, 
         COALESCE(subcategory,
             CASE
@@ -105,22 +123,32 @@ unique_products as (
         reorder_point,supplier_id,
         ROW_NUMBER() over(partition by product_id order by product_id) as num_fila 
 
-    from ecommerce_raw),
+    from ecommerce_raw)
     
 
-
-DimProduct AS (
     SELECT  product_id, product_name,subcategory, category,reorder_point,supplier_id
     from unique_products
-    WHERE num_fila = 1),
+    WHERE num_fila = 1;
+GO
 
 
-FactInventory AS (
-    SELECT top 10 product_id, inventory_on_hand, 
+DROP VIEW IF EXISTS FactInventory
+GO
+CREATE VIEW FactInventory AS 
+
+
+    SELECT  product_id, inventory_on_hand, 
         days_in_stock, supplier_lead_time_days,warehouse_id,fulfillment_status
-        from ecommerce_raw),
+        from ecommerce_raw
+GO
 
-returns_processed AS (
+
+
+DROP VIEW IF EXISTS FactReturns
+GO
+CREATE VIEW FactReturns AS 
+
+    WITH returns_processed AS (
     SELECT DISTINCT order_id,
         COALESCE(
             TRY_CAST(TRY_CONVERT(DATETIME,return_date,101) AS DATE),
@@ -138,19 +166,17 @@ returns_processed AS (
             END as return_flag
             
     from ecommerce_raw
-),
-FactReturns AS (
+)
     select order_id,return_date,return_reason,sum(refund_amount) AS refund_amount 
 
 
         FROM returns_processed
         WHERE return_flag !=0
-        GROUP BY order_id,return_date,return_reason
-        )
+        GROUP BY order_id,return_date,return_reason;
+GO
+        
 
 
-SELECT top 10 *
-from FactReturns;
 
 
 
