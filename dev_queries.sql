@@ -33,7 +33,7 @@ GO
 CREATE VIEW FactSales AS 
 
         
-        SELECT DISTINCT product_id,order_id,
+        SELECT DISTINCT top 1000  product_id,order_id,
             COALESCE(
             TRY_CAST(TRY_CONVERT(DATETIME,order_date,101) AS DATE),
                 TRY_CAST(TRY_CONVERT(DATETIME,order_date,103) AS DATE),
@@ -141,7 +141,7 @@ GO
 CREATE VIEW FactInventory AS 
 
 
-    SELECT  product_id, inventory_on_hand, 
+    SELECT top 1000  product_id, inventory_on_hand, 
         days_in_stock, supplier_lead_time_days,warehouse_id,fulfillment_status
         from ecommerce_raw
 GO
@@ -171,7 +171,7 @@ CREATE VIEW FactReturns AS
             
     from ecommerce_raw
 )
-    select order_id,return_date,return_reason,sum(refund_amount) AS refund_amount 
+    select top 1000 order_id,return_date,return_reason,sum(refund_amount) AS refund_amount 
 
 
         FROM returns_processed
