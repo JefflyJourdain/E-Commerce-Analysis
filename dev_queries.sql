@@ -26,11 +26,16 @@ WITH normalized_data AS (
 GO
 
 
-
+ UPDATE ecommerce_raw
+    SET gross_margin_pct =  cast(REPLACE(gross_margin_pct,'%','') AS DECIMAL(10,2)),
+    discount_pct =  cast(REPLACE(discount_pct,'%','') AS DECIMAL(10,2))
+GO
 
 DROP VIEW IF EXISTS FactSales
 GO
-CREATE VIEW FactSales AS 
+CREATE VIEW FactSales AS
+
+   
 
         
         SELECT DISTINCT top 1000  product_id,order_id,
@@ -54,17 +59,24 @@ CREATE VIEW FactSales AS
             )AS delivery_date,
             customer_id,
             sales_channel,
+            geography_key
             quantity,
             unit_price,
             unit_cogs,
-            discount_pct,
+            CASE 
+                WHEN discount_pct > 1 THEN discount_pct / 100
+                ELSE discount_pct
+                END AS discount_pct,
             gross_revenue,
             net_revenue,
             cogs_total,
             gross_profit,
-            gross_margin_pct,
+            CASE 
+                WHEN  gross_margin_pct > 1 THEN gross_margin_pct / 100
+                ELSE gross_margin_pct
+                END AS gross_margin_pct,
             shipping_cost,
-            geography_key,
+            
             CASE 
                 WHEN lower(payment_method) IN('visa','mastercard','cc') THEN 'Credit Card'
                     ELSE payment_method
@@ -77,7 +89,10 @@ CREATE VIEW FactSales AS
 
 
         FROM ecommerce_raw
-        LEFT JOIN DimGeography on ecommerce_raw.region = DimGeography.region;
+        LEFT JOIN DimGeography on ecommerce_raw.region = DimGeography.region
+
+
+        ;
 GO
 
 
