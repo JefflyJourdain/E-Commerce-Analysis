@@ -29,8 +29,11 @@ GO
  UPDATE ecommerce_raw
     SET gross_margin_pct =  cast(REPLACE(gross_margin_pct,'%','') AS DECIMAL(10,2)),
     discount_pct =  cast(REPLACE(discount_pct,'%','') AS DECIMAL(10,2))
+ALTER TABLE ecommerce_raw
+alter COLUMN gross_margin_pct decimal(10,2)
+ALTER TABLE ecommerce_raw
+alter COLUMN discount_pct decimal(10,2)
 GO
-
 DROP VIEW IF EXISTS FactSales
 GO
 CREATE VIEW FactSales AS
@@ -59,7 +62,7 @@ CREATE VIEW FactSales AS
             )AS delivery_date,
             customer_id,
             sales_channel,
-            geography_key
+            geography_key,
             quantity,
             unit_price,
             unit_cogs,
@@ -106,7 +109,7 @@ WITH unique_cust AS (
     from ecommerce_raw)
 
 
-    SELECT customer_id,customer_name,customer_email,customer_segment
+    SELECT top 1000 customer_id,customer_name,customer_email,customer_segment
     from unique_cust
     where num_cust = 1
 GO
@@ -194,8 +197,6 @@ CREATE VIEW FactReturns AS
         GROUP BY order_id,return_date,return_reason;
 GO
         
-
-
 
 
 
