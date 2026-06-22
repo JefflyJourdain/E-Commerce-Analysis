@@ -160,7 +160,13 @@ CREATE VIEW FactInventory AS
 
 
     SELECT top 1000  product_id, inventory_on_hand, 
-        days_in_stock, supplier_lead_time_days,warehouse_id,fulfillment_status
+        days_in_stock, supplier_lead_time_days,warehouse_id,fulfillment_status,           
+         COALESCE(
+            TRY_CAST(TRY_CONVERT(DATETIME,ship_date,101) AS DATE),
+                TRY_CAST(TRY_CONVERT(DATETIME,ship_date,103) AS DATE),
+                TRY_CAST(TRY_CONVERT(DATETIME,ship_date,105) AS DATE),
+                TRY_CAST(TRY_CONVERT(DATETIME,ship_date,120) AS DATE)
+            )AS movement_day 
         from ecommerce_raw
 GO
 
@@ -185,16 +191,16 @@ CREATE VIEW FactReturns AS
             WHEN lower(return_flag) IN ('y','true','yes') THEN 1
             WHEN lower(return_flag) IN ('n','false','no') THEN 0
             ELSE return_flag
-            END as return_flag
+            END as return_flag,product_id
             
     from ecommerce_raw
 )
-    select top 1000 order_id,return_date,return_reason,sum(refund_amount) AS refund_amount 
+    select top 1000 order_id,return_date,return_reason,sum(refund_amount) AS refund_amount,product_id
 
 
         FROM returns_processed
         WHERE return_flag !=0
-        GROUP BY order_id,return_date,return_reason;
+        GROUP BY order_id,return_date,return_reason,product_id;
 GO
         
 
