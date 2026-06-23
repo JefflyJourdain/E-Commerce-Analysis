@@ -159,7 +159,7 @@ GO
 CREATE VIEW FactInventory AS 
 
 
-    SELECT top 1000  product_id, inventory_on_hand, 
+    SELECT top 998  product_id, inventory_on_hand, 
         days_in_stock, supplier_lead_time_days,warehouse_id,fulfillment_status,           
          COALESCE(
             TRY_CAST(TRY_CONVERT(DATETIME,ship_date,101) AS DATE),
