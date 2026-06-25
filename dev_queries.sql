@@ -61,7 +61,11 @@ CREATE VIEW FactSales AS
                 TRY_CAST(TRY_CONVERT(DATETIME,delivery_date,120) AS DATE)
             )AS delivery_date,
             customer_id,
-            sales_channel,
+            CASE 
+                WHEN sales_channel in('shop','Shopify' ) THEN 'Shopify'
+                when sales_channel in ('AMZ','Amazon' )     THEN 'Amazon'
+                ELSE sales_channel
+                END AS sales_channel,
             geography_key,
             quantity,
             unit_cogs,
