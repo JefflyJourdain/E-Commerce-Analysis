@@ -64,7 +64,6 @@ CREATE VIEW FactSales AS
             sales_channel,
             geography_key,
             quantity,
-            unit_price,
             unit_cogs,
             CASE 
                 WHEN discount_pct > 1 THEN discount_pct / 100
@@ -159,7 +158,7 @@ GO
 CREATE VIEW FactInventory AS 
 
 
-    SELECT top 998  product_id, inventory_on_hand, 
+    SELECT top 998  product_id, inventory_on_hand,unit_price,
         days_in_stock, supplier_lead_time_days,warehouse_id,fulfillment_status,           
          COALESCE(
             TRY_CAST(TRY_CONVERT(DATETIME,ship_date,101) AS DATE),
