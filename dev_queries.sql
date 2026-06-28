@@ -39,21 +39,49 @@ GO
 CREATE VIEW FactSales AS
 
    
-
+WITH dates_cleaned AS (
+    SELECT 
+        order_id,
+        COALESCE(
+            TRY_CAST(TRY_CONVERT(DATETIME, order_date, 101) AS DATE),
+            TRY_CAST(TRY_CONVERT(DATETIME, order_date, 103) AS DATE),
+            TRY_CAST(TRY_CONVERT(DATETIME, order_date, 105) AS DATE),
+            TRY_CAST(TRY_CONVERT(DATETIME, order_date, 120) AS DATE)
+        ) AS parsed_order_date,
         
-        SELECT DISTINCT top 1000  product_id,order_id,
-            COALESCE(
-            TRY_CAST(TRY_CONVERT(DATETIME,order_date,101) AS DATE),
-                TRY_CAST(TRY_CONVERT(DATETIME,order_date,103) AS DATE),
-                TRY_CAST(TRY_CONVERT(DATETIME,order_date,105) AS DATE),
-                TRY_CAST(TRY_CONVERT(DATETIME,order_date,120) AS DATE)
-            )AS order_date,
-            COALESCE(
-            TRY_CAST(TRY_CONVERT(DATETIME,ship_date,101) AS DATE),
-                TRY_CAST(TRY_CONVERT(DATETIME,ship_date,103) AS DATE),
-                TRY_CAST(TRY_CONVERT(DATETIME,ship_date,105) AS DATE),
-                TRY_CAST(TRY_CONVERT(DATETIME,ship_date,120) AS DATE)
-            )AS ship_date,
+        COALESCE(
+            TRY_CAST(TRY_CONVERT(DATETIME, ship_date, 101) AS DATE),
+            TRY_CAST(TRY_CONVERT(DATETIME, ship_date, 103) AS DATE),
+            TRY_CAST(TRY_CONVERT(DATETIME, ship_date, 105) AS DATE),
+            TRY_CAST(TRY_CONVERT(DATETIME, ship_date, 120) AS DATE)
+        ) AS parsed_ship_date,
+        order_date AS raw_order_date,
+        ship_date AS raw_ship_date
+    FROM ecommerce_raw
+),
+
+dates_normalized AS (
+    SELECT 
+        order_id,
+        CASE 
+            WHEN YEAR(parsed_order_date) > YEAR(parsed_ship_date) 
+            
+            THEN DATEFROMPARTS(
+                YEAR(parsed_ship_date),
+                MONTH(parsed_order_date),
+                day(parsed_order_date) 
+                )
+            ELSE parsed_order_date 
+        END AS final_order_date,
+        parsed_ship_date AS final_ship_date,
+        raw_order_date,
+        raw_ship_date
+    FROM dates_cleaned
+)
+   
+        SELECT DISTINCT top 1000  product_id,ecommerce_raw.order_id,
+           dates_normalized.final_order_date AS order_date,
+            dates_normalized.final_ship_date as ship_date,
             COALESCE(
             TRY_CAST(TRY_CONVERT(DATETIME,delivery_date,101) AS DATE),
                 TRY_CAST(TRY_CONVERT(DATETIME,delivery_date,103) AS DATE),
@@ -92,10 +120,11 @@ CREATE VIEW FactSales AS
             order_status,
             notes
             
-
+        
 
         FROM ecommerce_raw
         LEFT JOIN DimGeography on ecommerce_raw.region = DimGeography.region
+        LEFT JOIN dates_normalized on ecommerce_raw.order_id = dates_normalized.order_id
 
 
         ;
