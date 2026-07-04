@@ -23,11 +23,13 @@ An end-to-end data analytics project built on a synthetic e-commerce operations 
 
 This project analyzes the operational and financial performance of a multi-channel e-commerce business, covering revenue, margin, return rates, and channel behaviour across product categories and customer segments. The goal was to build a production-grade analytics pipeline, from raw data ingestion to a live, refreshing dashboard, rather than a static one-time analysis.
 
+
 **Business Questions addressed:**
 - Which product categories and subcategories drive the most revenue vs. the most margin?
 - How do B2B, Wholesale, and B2C channels compare in AOV and profitability?
 - Where is margin being lost — pricing, discounting, or product mix?
 - Which subcategories have anomalous return rates, and where is revenue concentrated?
+<img width="551" height="342" alt="{DAE7E42C-1959-41BB-AF7D-0A4FCF2BACE8}" src="https://github.com/user-attachments/assets/be83e481-5de5-451b-a76b-38a28a7c7f79" />
 
 ---
 
@@ -149,6 +151,7 @@ A single-page executive dashboard deployed live on Power BI Service.
 
 - **B2B AOV is 1% higher than Wholesale, and 76% higher than B2C** — as expected for a direct business channel vs. consumer
 - **Wholesale AOV is 83% higher than Amazon and 86% higher than Shopify** — the self-managed wholesale channel significantly outperforms marketplace channels in average order value, likely reflecting bulk purchasing behaviour
+<img width="551" height="342" alt="{DAE7E42C-1959-41BB-AF7D-0A4FCF2BACE8}" src="https://github.com/user-attachments/assets/e210fa30-46fe-470d-ab2e-1f3e67a442eb" />
 
 ---
 
