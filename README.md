@@ -1,6 +1,6 @@
 # 🛒 E-Commerce Operations Analytics — ETL Pipeline & Dashboard
 
-> **Status:** ✅ Complete — Live on Power BI Service with daily scheduled refresh
+> **Status:** ✅ Completed — Live on Power BI Service with daily scheduled refresh
 
 An end-to-end data analytics project built on a synthetic e-commerce operations dataset. The project covers a full modern data stack: a **Python ETL pipeline** extracting data via the Kaggle API and loading directly into **Azure SQL**, advanced **T-SQL** data cleaning and modelling, and a **Power BI** executive dashboard with live cloud deployment.
 
@@ -21,7 +21,7 @@ An end-to-end data analytics project built on a synthetic e-commerce operations 
 
 ## Project Overview
 
-This project analyzes the operational and financial performance of a multi-channel e-commerce business, covering revenue, margin, return rates, and channel behaviour across product categories and customer segments. The goal was to build a production-grade analytics pipeline — from raw data ingestion to a live, refreshing dashboard — rather than a static one-time analysis.
+This project analyzes the operational and financial performance of a multi-channel e-commerce business, covering revenue, margin, return rates, and channel behaviour across product categories and customer segments. The goal was to build a production-grade analytics pipeline, from raw data ingestion to a live, refreshing dashboard, rather than a static one-time analysis.
 
 **Business Questions addressed:**
 - Which product categories and subcategories drive the most revenue vs. the most margin?
