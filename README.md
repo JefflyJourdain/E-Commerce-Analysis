@@ -149,6 +149,7 @@ A single-page executive dashboard deployed live on Power BI Service.
 
 - **B2B AOV is 1% higher than Wholesale, and 76% higher than B2C** — as expected for a direct business channel vs. consumer
 - **Wholesale AOV is 83% higher than Amazon and 86% higher than Shopify** — the self-managed wholesale channel significantly outperforms marketplace channels in average order value, likely reflecting bulk purchasing behaviour
+<img width="551" height="342" alt="{DAE7E42C-1959-41BB-AF7D-0A4FCF2BACE8}" src="https://github.com/user-attachments/assets/e210fa30-46fe-470d-ab2e-1f3e67a442eb" />
 
 ---
 
