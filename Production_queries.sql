@@ -39,8 +39,8 @@ GO
 CREATE VIEW FactSales AS
 
    
-WITH dates_cleaned AS (
-    SELECT 
+    WITH dates_cleaned AS (
+     SELECT 
         order_id,
         COALESCE(
             TRY_CAST(TRY_CONVERT(DATETIME, order_date, 101) AS DATE),
@@ -115,7 +115,7 @@ dates_normalized AS (
                 WHEN lower(payment_method) IN('visa','mastercard','cc') THEN 'Credit Card'
                     ELSE payment_method
                     END AS payment_method,
-            payment_status,
+            lower(payment_status) as payment_status ,
             fulfillment_status,
             order_status,
             notes
