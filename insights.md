@@ -25,8 +25,13 @@ wholesale has an 83 percent higher than amazon, and 86 percent higher than shopi
 
 
 Does discounting actually pay for itself? (their Q2) — Pricing strategy, untouched by your other projects. Plot discount_pct against volume and gross_margin_pct: does extra quantity offset the margin hit, or are you just giving money away?
+
 Which products are heroes vs. dead weight? (their Q9) — Volume/margin quadrant classification. The most "hire this person" question on the list — it's the kind of output a merchandising team actually acts on, and neither existing project does a quadrant-style product classification.
+
+
 What's your repeat purchase rate? (their Q5) — Retention over acquisition, classic exec question. It's a lightweight version of what you're planning for Project 4 (RFM/cohort in Python), so it sets up a nice arc: quick SQL repeat-rate check now, full cohort analysis later.
+
 Where's fulfillment breaking down? (merge their Q6 + Q7) — Combine order-to-ship-to-delivery time with the product/region breakdown into one question instead of two. Genuinely new territory — neither existing project touches operations. Fix the ship_date duplication above before building this one.
+
 What does order completion/failure actually cost? (their Q8) — but check the distribution first. Run a GROUP BY on order_status, payment_status, fulfillment_status before committing — if it's 95%+ "Completed/Paid/Fulfilled" like your sample suggests, there's no real variance to analyze and it falls flat. If it's genuinely mixed, keep it. If not, swap in seasonality (their Q10) instead — safer since order_date always varies.
 
