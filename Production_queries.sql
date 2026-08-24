@@ -55,6 +55,12 @@ CREATE VIEW FactSales AS
             TRY_CAST(TRY_CONVERT(DATETIME, ship_date, 105) AS DATE),
             TRY_CAST(TRY_CONVERT(DATETIME, ship_date, 120) AS DATE)
         ) AS parsed_ship_date,
+                COALESCE(
+            TRY_CAST(TRY_CONVERT(DATETIME, delivery_date, 101) AS DATE),
+            TRY_CAST(TRY_CONVERT(DATETIME, delivery_date, 103) AS DATE),
+            TRY_CAST(TRY_CONVERT(DATETIME, delivery_date, 105) AS DATE),
+            TRY_CAST(TRY_CONVERT(DATETIME, delivery_date, 120) AS DATE)
+        ) AS parsed_delivery_date,
         order_date AS raw_order_date,
         ship_date AS raw_ship_date
     FROM ecommerce_raw
@@ -73,7 +79,17 @@ dates_normalized AS (
                 )
             ELSE parsed_order_date 
         END AS final_order_date,
-        parsed_ship_date AS final_ship_date,
+        
+        CASE 
+            WHEN YEAR(parsed_ship_date) < YEAR(parsed_order_date) or
+                year(parsed_order_date) > YEAR(parsed_delivery_date)
+            
+            THEN DATEFROMPARTS(
+                YEAR(parsed_delivery_date),
+                MONTH(parsed_ship_date),
+                day(parsed_ship_date) 
+                )
+            ELSE parsed_ship_date end  AS final_ship_date,
         raw_order_date,
         raw_ship_date
     FROM dates_cleaned
@@ -223,16 +239,18 @@ CREATE VIEW FactReturns AS
             WHEN lower(return_flag) IN ('y','true','yes') THEN 1
             WHEN lower(return_flag) IN ('n','false','no') THEN 0
             ELSE return_flag
-            END as return_flag,product_id
+            END as return_flag,product_id,geography_key
             
     from ecommerce_raw
+    LEFT JOIN DimGeography on ecommerce_raw.region = DimGeography.region
+
 )
-    select order_id,return_date,return_reason,sum(refund_amount) AS refund_amount,product_id
+    select order_id,return_date,return_reason,sum(refund_amount) AS refund_amount,product_id,geography_key
 
 
         FROM returns_processed
         WHERE return_flag !=0
-        GROUP BY order_id,return_date,return_reason,product_id;
+        GROUP BY order_id,return_date,return_reason,product_id,geography_key;
 GO
         
 
